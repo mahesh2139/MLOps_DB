@@ -1,0 +1,41 @@
+name: Databricks CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]   # Trigger on push to main branch
+  pull_request:
+    branches: [main]   # Or PRs targeting main
+
+jobs:
+  databricks-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Install Databricks CLI
+      run: |
+        pip install databricks-cli
+
+    - name: Configure Databricks CLI
+      run: |
+        databricks configure --token <<EOF
+        ${{ secrets.DATABRICKS_HOST }}
+        ${{ secrets.DATABRICKS_TOKEN }}
+        EOF
+
+    - name: Run Databricks job: train_model
+      run: |
+        JOB_ID=$(databricks jobs list --output JSON | jq '.jobs[] | select(.settings.name=="train_model") | .job_id')
+        databricks jobs run-now --job-id $JOB_ID
+
+    - name: Run Databricks job: register_model
+      run: |
+        JOB_ID=$(databricks jobs list --output JSON | jq '.jobs[] | select(.settings.name=="register_model") | .job_id')
+        databricks jobs run-now --job-id $JOB_ID
+
+    - name: Run Databricks job: batch_prediction
+      run: |
+        JOB_ID=$(databricks jobs list --output JSON | jq '.jobs[] | select(.settings.name=="batch_prediction") | .job_id')
+        databricks jobs run-now --job-id $JOB_ID
