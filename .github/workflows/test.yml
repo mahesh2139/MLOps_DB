@@ -1,4 +1,4 @@
-name: Databricks CI/CD Pipeline
+name: test Pipeline
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
         run: |
           pip install databricks-cli
           sudo apt-get update && sudo apt-get install -y jq
-
+          
       - name: Run Databricks job Train_Register_Model
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
