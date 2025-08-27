@@ -24,7 +24,7 @@ jobs:
           pip install databricks-cli
           sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Run Databricks job: Train_Register_Model
+      - name: Run Databricks job Train_Register_Model
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
@@ -32,7 +32,7 @@ jobs:
           JOB_ID=$(databricks jobs list --output JSON | jq -r '.jobs[] | select(.settings.name=="Train_Register_Model") | .job_id')
           databricks jobs run-now --job-id $JOB_ID
 
-      - name: Run Databricks job: batch_prediction
+      - name: Run Databricks job batch_prediction
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
