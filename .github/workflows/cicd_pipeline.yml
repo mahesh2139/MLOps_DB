@@ -23,7 +23,6 @@ jobs:
         run: |
           pip install databricks-cli
           sudo apt-get update && sudo apt-get install -y jq
-
       - name: Run Databricks job Train_Register_Model
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
@@ -37,10 +36,8 @@ jobs:
            echo "❌ Job 'Train_Register_Model' not found."
            exit 1
           fi
-
          echo "✅ Found Job ID: $JOB_ID"
          databricks jobs run-now --job-id $JOB_ID
-
       - name: Run Databricks job batch_prediction
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
