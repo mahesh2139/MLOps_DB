@@ -29,8 +29,17 @@ jobs:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          JOB_ID=$(databricks jobs list --output JSON | jq -r '.jobs[] | select(.settings.name=="Train_Register_Model") | .job_id')
-          databricks jobs run-now --job-id $JOB_ID
+          echo "Listing jobs..."
+          JOB_LIST=$(databricks jobs list --output JSON)
+          echo "$JOB_LIST" | jq .
+          JOB_ID=$(echo "$JOB_LIST" | jq -r '.jobs[] | select(.settings.name=="Train_Register_Model") | .job_id')
+          if [ -z "$JOB_ID" ]; then
+           echo "❌ Job 'Train_Register_Model' not found."
+           exit 1
+          fi
+
+         echo "✅ Found Job ID: $JOB_ID"
+         databricks jobs run-now --job-id $JOB_ID
 
       - name: Run Databricks job batch_prediction
         env:
