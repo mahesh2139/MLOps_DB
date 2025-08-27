@@ -13,7 +13,10 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
-
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
     - name: Install Databricks CLI
       run: |
         pip install databricks-cli
@@ -25,14 +28,9 @@ jobs:
         ${{ secrets.DATABRICKS_TOKEN }}
         EOF
 
-    - name: Run Databricks job: train_model
+    - name: Run Databricks job: Train_Register_Model
       run: |
-        JOB_ID=$(databricks jobs list --output JSON | jq '.jobs[] | select(.settings.name=="train_model") | .job_id')
-        databricks jobs run-now --job-id $JOB_ID
-
-    - name: Run Databricks job: register_model
-      run: |
-        JOB_ID=$(databricks jobs list --output JSON | jq '.jobs[] | select(.settings.name=="register_model") | .job_id')
+        JOB_ID=$(databricks jobs list --output JSON | jq '.jobs[] | select(.settings.name=="Train_Register_Model") | .job_id')
         databricks jobs run-now --job-id $JOB_ID
 
     - name: Run Databricks job: batch_prediction
