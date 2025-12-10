@@ -23,7 +23,14 @@ jobs:
         run: |
           pip install databricks-cli
           sudo apt-get update && sudo apt-get install -y jq
-          
+
+      - name: Configure Databricks CLI (non-interactive)
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          printf "%s\n%s\n" "$DATABRICKS_HOST" "$DATABRICKS_TOKEN" | databricks configure --token
+
       - name: Upgrade Jobs API version
         run: databricks jobs configure --version=2.1
 
@@ -32,14 +39,18 @@ jobs:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          JOB_ID=$(databricks jobs list --output JSON | jq -r '.jobs[] | select(.settings.name=="Train_Register_Model") | .job_id')
+          JOB_ID=$(databricks jobs list --output JSON 2>/dev/null | \
+            jq -r '.jobs[] | select(.settings.name=="Train_Register_Model") | .job_id')
+          echo "Running job $JOB_ID"
           databricks jobs run-now --job-id $JOB_ID
 
       - name: Run Databricks job batch_prediction
-        if: success()  # Only run if the previous step succeeded
+        if: success()
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          JOB_ID=$(databricks jobs list --output JSON | jq -r '.jobs[] | select(.settings.name=="batch_prediction") | .job_id')
+          JOB_ID=$(databricks jobs list --output JSON 2>/dev/null | \
+            jq -r '.jobs[] | select(.settings.name=="batch_prediction") | .job_id')
+          echo "Running job $JOB_ID"
           databricks jobs run-now --job-id $JOB_ID
