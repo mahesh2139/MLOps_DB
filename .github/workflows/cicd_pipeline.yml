@@ -29,6 +29,7 @@ jobs:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
+          databricks jobs configure --version=2.1
           JOB_ID=$(databricks jobs list --output JSON | jq -r '.jobs[] | select(.settings.name=="Train_Register_Model") | .job_id')
           databricks jobs run-now --job-id $JOB_ID
 
